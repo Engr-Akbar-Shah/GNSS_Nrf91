@@ -1,0 +1,78 @@
+
+menu "GNSS sample"
+
+choice
+	default GNSS_SAMPLE_MODE_CONTINUOUS
+	prompt "Select GNSS operation mode"
+
+config GNSS_SAMPLE_MODE_CONTINUOUS
+	bool "Continuous tracking"
+
+config GNSS_SAMPLE_MODE_PERIODIC
+	bool "Periodic fixes"
+
+endchoice
+
+if GNSS_SAMPLE_MODE_PERIODIC
+
+config GNSS_SAMPLE_PERIODIC_INTERVAL
+	int "Fix interval for periodic fixes"
+	range 10 65535
+	default 120
+	help
+	  Fix interval (in seconds) for periodic fixes.
+
+config GNSS_SAMPLE_PERIODIC_TIMEOUT
+	int "Fix timeout for periodic fixes"
+	range 0 65535
+	default 120
+	help
+	  Fix timeout (in seconds) for periodic fixes.
+	  If set to zero, GNSS is allowed to run indefinitely until a valid PVT estimate is produced.
+
+endif # GNSS_SAMPLE_MODE_PERIODIC
+endmenu
+
+if GNSS_SAMPLE_MODE_CONTINUOUS
+
+choice
+	default GNSS_SAMPLE_POWER_SAVING_DISABLED
+	prompt "Select GNSS power saving mode (duty-cycling)"
+
+config GNSS_SAMPLE_POWER_SAVING_DISABLED
+	bool "No power saving"
+
+config GNSS_SAMPLE_POWER_SAVING_MODERATE
+	bool "Power saving without significant performance degradation"
+
+config GNSS_SAMPLE_POWER_SAVING_HIGH
+	bool "Power saving with acceptable performance degradation"
+
+endchoice
+
+endif # GNSS_SAMPLE_MODE_CONTINUOUS
+
+config GNSS_SAMPLE_REFERENCE_LATITUDE
+	string "Reference position latitude in decimal degrees"
+	help
+	  When set, the sample calculates the distance from the reference position for each fix.
+	  Given in decimal degrees (DD), for example "61.500000".
+
+config GNSS_SAMPLE_REFERENCE_LONGITUDE
+	string "Reference position longitude in decimal degrees"
+	help
+	  When set, the sample calculates the distance from the reference position for each fix.
+	  Given in decimal degrees (DD), for example "23.800000".
+
+config GNSS_SAMPLE_LOW_ACCURACY
+	bool "Allow low accuracy fixes"
+	help
+	  Allows fixes with lower accuracy.
+
+menu "Zephyr Kernel"
+source "Kconfig.zephyr"
+endmenu
+
+module = GNSS_SAMPLE
+module-str = GNSS sample
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
